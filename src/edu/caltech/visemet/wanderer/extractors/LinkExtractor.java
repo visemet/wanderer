@@ -18,13 +18,12 @@ import java.util.Arrays;
 @XStreamAlias("link-extractor")
 public class LinkExtractor<R extends ResourceWrapper> implements BodyExtractor<R> {
 
-    private static final BoyerMooreHorspool BOYER_MOORE_HORSPOOL =
-            new BoyerMooreHorspool();
-
     @XStreamAlias("resource-factory")
     private ResourceFactory<R> resourceFactory;
 
     private transient Centipede<R> centipede;
+
+    private transient BoyerMooreHorspool boyerMooreHorspool;
 
     /**
      * Class constructor.
@@ -44,6 +43,8 @@ public class LinkExtractor<R extends ResourceWrapper> implements BodyExtractor<R
     @Override
     public void initialize(final Centipede<R> centipede) {
         this.centipede = centipede;
+
+        boyerMooreHorspool = new BoyerMooreHorspool();
     }
 
     @Override
@@ -56,16 +57,16 @@ public class LinkExtractor<R extends ResourceWrapper> implements BodyExtractor<R
         final byte[] hrefEndPattern = "\"".getBytes();
         final byte[] aClosePattern = ">".getBytes();
 
-        while ((iterPos = BOYER_MOORE_HORSPOOL.searchBytes(body, iterPos, aOpenPattern)) != -1) {
+        while ((iterPos = boyerMooreHorspool.searchBytes(body, iterPos, aOpenPattern)) != -1) {
             iterPos += aOpenPattern.length;
 
-            int maxPos = BOYER_MOORE_HORSPOOL.searchBytes(body, iterPos, aClosePattern);
+            int maxPos = boyerMooreHorspool.searchBytes(body, iterPos, aClosePattern);
 
-            int startPos = BOYER_MOORE_HORSPOOL.searchBytes(body, iterPos, hrefBeginPattern);
+            int startPos = boyerMooreHorspool.searchBytes(body, iterPos, hrefBeginPattern);
             startPos += hrefBeginPattern.length;
 
             if (startPos < maxPos) {
-                int endPos = BOYER_MOORE_HORSPOOL.searchBytes(body, startPos, hrefEndPattern);
+                int endPos = boyerMooreHorspool.searchBytes(body, startPos, hrefEndPattern);
                 final byte[] href = Arrays.copyOfRange(body, startPos, endPos);
 
                 final String URI = Resources.normalize(

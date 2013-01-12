@@ -3,7 +3,11 @@ package edu.caltech.visemet.wanderer;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
+import edu.caltech.visemet.wanderer.centipedes.DepthCentipede;
+import edu.caltech.visemet.wanderer.extractors.LinkExtractor;
+import edu.caltech.visemet.wanderer.sieves.DuplicateSieve;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -76,7 +80,11 @@ public class Setup<R extends ResourceWrapper> {
         Centipede<R> centipede = setup.getCentipede();
         loader.load(getClass(centipede));
 
-        for (BodyExtractor bodyExtractor : centipede.retrieveBodyExtractors()) {
+        for (ResourceSieve<R> resourceSieve : centipede.retrieveResourceSieves()) {
+            loader.load(getClass(resourceSieve));
+        }
+
+        for (BodyExtractor<R> bodyExtractor : centipede.retrieveBodyExtractors()) {
             loader.load(getClass(bodyExtractor));
             loader.load(getClass(bodyExtractor.getResourceFactory()));
         }
@@ -165,6 +173,32 @@ public class Setup<R extends ResourceWrapper> {
             }
 
             centipede.suspend();
+        } else {
+            Setup<ResourceWrapper> setup = new Setup<>();
+
+            setup.addResource(new DepthCentipede.DepthResource(
+                    0, "http://localhost:3000"));
+
+            Centipede<ResourceWrapper> centipede = new DepthCentipede();
+            centipede.initialize();
+
+            for (ResourceWrapper resource : setup.getResources()) {
+                centipede.examine(resource);
+            }
+
+            DuplicateSieve<ResourceWrapper> duplicateSieve =
+                    new DuplicateSieve<>();
+
+            centipede.apply(duplicateSieve);
+
+            LinkExtractor<ResourceWrapper> linkExtractor = new LinkExtractor<>();
+            linkExtractor.setResourceFactory(new DepthCentipede.Factory());
+
+            centipede.apply(linkExtractor);
+
+            setup.setCentipede(centipede);
+
+            Setup.store(setup, new FileOutputStream("setup.xml"));
         }
     }
 

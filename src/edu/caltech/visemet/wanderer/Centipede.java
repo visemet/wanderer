@@ -26,6 +26,21 @@ public interface Centipede<R extends ResourceWrapper> {
     boolean examine(R resource);
 
     /**
+     * Returns the list of resource sieves used by this centipede.
+     *
+     * @return the list of resource sieves used by this centipede
+     */
+    List<ResourceSieve<R>> retrieveResourceSieves();
+
+    /**
+     * Adds the specified resource sieve to the list of resource sieves used by
+     * this centipede.
+     *
+     * @param resourceSieve the resource sieve to apply
+     */
+    void apply(ResourceSieve<R> resourceSieve);
+
+    /**
      * Returns the list of body extractors used by this centipede.
      *
      * @return the list of body extractors used by this centipede

@@ -28,6 +28,9 @@ import java.util.concurrent.Executors;
 public abstract class AbstractCentipede<R extends ResourceWrapper>
 implements Centipede<R> {
 
+    @XStreamAlias("resource-sieves")
+    private final List<ResourceSieve<R>> resourceSieves = new ArrayList<>();
+
     @XStreamAlias("body-extractors")
     private final List<BodyExtractor<R>> bodyExtractors = new ArrayList<>();
 
@@ -48,6 +51,10 @@ implements Centipede<R> {
         asyncHttpClient = new AsyncHttpClient();
         executorService = Executors.newCachedThreadPool();
 
+        for (ResourceSieve<R> resourceSieve : resourceSieves) {
+            resourceSieve.initialize();
+        }
+
         for (BodyExtractor<R> bodyExtractor : bodyExtractors) {
             bodyExtractor.initialize(this);
         }
@@ -56,10 +63,26 @@ implements Centipede<R> {
     @Override
     public boolean examine(R resource) {
         synchronized (this) {
+            for (ResourceSieve<R> resourceSieve : resourceSieves) {
+                if (!resourceSieve.shouldInclude(resource)) {
+                    return false;
+                }
+            }
+
             notify();
         }
 
         return resources.add(resource);
+    }
+
+    @Override
+    public List<ResourceSieve<R>> retrieveResourceSieves() {
+        return Collections.unmodifiableList(resourceSieves);
+    }
+
+    @Override
+    public void apply(ResourceSieve<R> resourceSieve) {
+        resourceSieves.add(resourceSieve);
     }
 
     @Override

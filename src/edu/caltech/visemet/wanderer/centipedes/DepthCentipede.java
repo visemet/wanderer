@@ -5,6 +5,7 @@ import edu.caltech.visemet.wanderer.AbstractCentipede;
 import edu.caltech.visemet.wanderer.ResourceFactory;
 import edu.caltech.visemet.wanderer.ResourceWrapper;
 import edu.caltech.visemet.wanderer.centipedes.DepthCentipede.DepthResource;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,19 +28,30 @@ extends AbstractCentipede<R> {
     /**
      * Class constructor.
      */
-    public DepthCentipede() {
+    public DepthCentipede() { }
+
+    @Override
+    public void initialize() {
+        super.initialize();
+
         currDepth = 0;
     }
 
     @Override
     public boolean examine(R resource) {
-        int depth = resource.getDepth();
+        boolean result = super.examine(resource);
 
-        if (currDepth < depth) {
-            currDepth = depth;
+        if (result) {
+            LOGGER.debug("{}", resource);
+
+            int depth = resource.getDepth();
+
+            if (currDepth < depth) {
+                currDepth = depth;
+            }
         }
 
-        return super.examine(resource);
+        return result;
     }
 
     @Override
@@ -81,6 +93,32 @@ extends AbstractCentipede<R> {
         @Override
         public String getResource() {
             return resource;
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 7;
+
+            hash = 41 * hash + Objects.hashCode(this.resource);
+
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            } else if (getClass() != obj.getClass()) {
+                return false;
+            }
+
+            final DepthResource other = (DepthResource) obj;
+
+            if (!Objects.equals(this.resource, other.resource)) {
+                return false;
+            }
+
+            return true;
         }
 
         @Override
