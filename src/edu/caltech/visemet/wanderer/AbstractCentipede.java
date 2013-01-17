@@ -4,6 +4,7 @@ import com.ning.http.client.AsyncCompletionHandler;
 import com.ning.http.client.AsyncHandler;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
+import com.ning.http.client.AsyncHttpClientConfig;
 import com.ning.http.client.HttpResponseBodyPart;
 import com.ning.http.client.ListenableFuture;
 import com.ning.http.client.Response;
@@ -13,6 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -34,7 +36,7 @@ implements Centipede<R> {
     @XStreamAlias("body-extractors")
     private final List<BodyExtractor<R>> bodyExtractors = new ArrayList<>();
 
-    private transient ConcurrentLinkedQueue<R> resources;
+    protected transient Queue<R> resources;
 
     private transient AsyncHttpClient asyncHttpClient;
 
@@ -48,8 +50,13 @@ implements Centipede<R> {
     @Override
     public void initialize() {
         resources = new ConcurrentLinkedQueue<>();
-        asyncHttpClient = new AsyncHttpClient();
+        asyncHttpClient = new AsyncHttpClient(new AsyncHttpClientConfig.Builder()
+                .setAllowPoolingConnection(true)
+                .setFollowRedirects(true)
+                .build());
+
         executorService = Executors.newCachedThreadPool();
+        // executorService = Executors.newSingleThreadExecutor();
 
         for (ResourceSieve<R> resourceSieve : resourceSieves) {
             resourceSieve.initialize();

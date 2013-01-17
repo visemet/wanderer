@@ -5,7 +5,9 @@ import edu.caltech.visemet.wanderer.AbstractCentipede;
 import edu.caltech.visemet.wanderer.ResourceFactory;
 import edu.caltech.visemet.wanderer.ResourceWrapper;
 import edu.caltech.visemet.wanderer.centipedes.DepthCentipede.DepthResource;
+import java.util.Comparator;
 import java.util.Objects;
+import java.util.concurrent.PriorityBlockingQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +36,13 @@ extends AbstractCentipede<R> {
     public void initialize() {
         super.initialize();
 
+        resources = new PriorityBlockingQueue<>(1, new Comparator<R>() {
+
+            @Override
+            public int compare(R r1, R r2) {
+                return r2.getDepth() - r1.getDepth();
+            }
+        });
         currDepth = 0;
     }
 
