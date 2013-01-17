@@ -25,6 +25,8 @@ public class Resources {
 
         if (path.startsWith("http://") || path.startsWith("https://")) {
             URI = path;
+        } else if (path.startsWith("//")) {
+            URI = "http:" + path;
         } else if (path.startsWith("/")) {
             int index = baseResource.indexOf("/", 7);
 
