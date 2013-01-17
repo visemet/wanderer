@@ -1,0 +1,28 @@
+<object-stream>
+  <loader>
+    <class>edu.caltech.visemet.wanderer.Setup</class>
+    <class>edu.caltech.visemet.wanderer.centipedes.TracerCentipede</class>
+    <class>edu.caltech.visemet.wanderer.sieves.DuplicateSieve</class>
+    <class>edu.caltech.visemet.wanderer.extractors.LinkExtractor</class>
+    <class>edu.caltech.visemet.wanderer.centipedes.TracerCentipede$Factory</class>
+  </loader>
+  <setup>
+    <centipede class="tracer-centipede">
+      <resource-sieves>
+        <duplicate-sieve/>
+      </resource-sieves>
+      <body-extractors>
+        <link-extractor>
+          <resource-factory class="history-resource-factory"/>
+        </link-extractor>
+      </body-extractors>
+      <target>http://en.wikipedia.org/wiki/K._Mani_Chandy</target>
+    </centipede>
+    <resources>
+      <history-resource>
+        <depth>0</depth>
+        <resource>http://en.wikipedia.org/wiki/Paul_Erd%C5%91s</resource>
+      </history-resource>
+    </resources>
+  </setup>
+</object-stream>

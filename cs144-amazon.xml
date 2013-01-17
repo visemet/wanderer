@@ -1,0 +1,33 @@
+<object-stream>
+  <loader>
+    <class>edu.caltech.visemet.wanderer.Setup</class>
+    <class>edu.caltech.visemet.wanderer.centipedes.TracerCentipede</class>
+    <class>edu.caltech.visemet.wanderer.sieves.DuplicateSieve</class>
+    <class>edu.caltech.visemet.wanderer.sieves.DomainSieve</class>
+    <class>edu.caltech.visemet.wanderer.extractors.LinkExtractor</class>
+    <class>edu.caltech.visemet.wanderer.centipedes.TracerCentipede$Factory</class>
+  </loader>
+  <setup>
+    <centipede class="tracer-centipede">
+      <resource-sieves>
+        <duplicate-sieve/>
+        <domain-sieve>
+          <pattern>www.amazon.com</pattern>
+        </domain-sieve>
+      </resource-sieves>
+      <body-extractors>
+        <link-extractor>
+          <resource-factory class="history-resource-factory"/>
+        </link-extractor>
+      </body-extractors>
+      <should-contain>true</should-contain>
+      <target>B009MDCAFE</target>
+    </centipede>
+    <resources>
+      <history-resource>
+        <depth>0</depth>
+        <resource>http://www.amazon.com/gp/product/B004XVN1V2</resource>
+      </history-resource>
+    </resources>
+  </setup>
+</object-stream>
