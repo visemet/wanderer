@@ -6,11 +6,14 @@ import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
 import com.ning.http.client.AsyncHttpClientConfig;
 import com.ning.http.client.HttpResponseBodyPart;
+import com.ning.http.client.HttpResponseHeaders;
 import com.ning.http.client.ListenableFuture;
 import com.ning.http.client.Response;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -112,24 +115,31 @@ implements Centipede<R> {
 
         final R resource = iterResource;
 
-        final BoundRequestBuilder request =
-                asyncHttpClient.prepareGet(resource.getResource());
+        try {
+            String URI = new URI(resource.getResource()).toString();
 
-        final ListenableFuture<byte[]> future =
-                request.execute(new ByteArrayAsyncCompletionHandler());
+            final BoundRequestBuilder request =
+                    // asyncHttpClient.prepareGet(resource.getResource());
+                    asyncHttpClient.prepareGet(URI);
 
-        for (final BodyExtractor<R> bodyExtractor : bodyExtractors) {
-            future.addListener(new Runnable() {
+            final ListenableFuture<byte[]> future =
+                    request.execute(new ByteArrayAsyncCompletionHandler());
 
-                @Override
-                public void run() {
-                    try {
-                        bodyExtractor.extract(resource, future.get());
-                    } catch (ExecutionException | InterruptedException ex) {
+            for (final BodyExtractor<R> bodyExtractor : bodyExtractors) {
+                future.addListener(new Runnable() {
 
+                    @Override
+                    public void run() {
+                        try {
+                            bodyExtractor.extract(resource, future.get());
+                        } catch (ExecutionException | InterruptedException ex) {
+
+                        }
                     }
-                }
-            }, executorService);
+                }, executorService);
+            }
+        } catch (URISyntaxException ex) {
+
         }
     }
 
@@ -143,6 +153,15 @@ implements Centipede<R> {
     extends AsyncCompletionHandler<byte[]> {
 
         private final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+
+        @Override
+        public STATE onHeadersReceived(HttpResponseHeaders headers) throws Exception {
+            if (headers.getHeaders().getFirstValue("Content-Type").startsWith("text/html")) {
+                return super.onHeadersReceived(headers);
+            }
+
+            return STATE.ABORT;
+        }
 
         @Override
         public AsyncHandler.STATE onBodyPartReceived(HttpResponseBodyPart content)
