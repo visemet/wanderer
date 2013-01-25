@@ -1,10 +1,18 @@
 package edu.caltech.visemet.wanderer;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  *
  * @author Max Hirschhorn #visemet
  */
 public class Resources {
+
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(Resources.class);
 
     /**
      * Class constructor.
@@ -23,6 +31,24 @@ public class Resources {
     public static String normalize(String baseResource, String path) {
         String URI = null;
 
+        try {
+            path = URLDecoder.decode(path, "UTF-8");
+        } catch (Exception ex) {
+            LOGGER.warn("base {}", baseResource);
+        }
+
+        if (path.contains("?")) {
+            path = path.substring(0, path.indexOf("?"));
+        }
+
+        if (path.contains("#")) {
+            path = path.substring(0, path.indexOf("#"));
+        }
+
+        if (path.endsWith("/")) {
+            path = path.substring(0, path.length() - 1);
+        }
+
         if (path.startsWith("http://") || path.startsWith("https://")) {
             URI = path;
         } else if (path.startsWith("//")) {
@@ -36,6 +62,10 @@ public class Resources {
                 URI = baseResource.concat(path);
             }
         }
+
+        /* if (URI != null && URI.endsWith("/")) {
+            URI = URI.substring(0, URI.length() - 1);
+        } */
 
         return URI;
     }
