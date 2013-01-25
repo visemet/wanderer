@@ -67,14 +67,17 @@ public class LinkExtractor<R extends ResourceWrapper> implements BodyExtractor<R
 
             if (startPos < maxPos) {
                 int endPos = boyerMooreHorspool.searchBytes(body, startPos, hrefEndPattern);
-                final byte[] href = Arrays.copyOfRange(body, startPos, endPos);
 
-                final String URI = Resources.normalize(
-                        resource.getResource(), new String(href));
+                if (endPos != -1) {
+                    final byte[] href = Arrays.copyOfRange(body, startPos, endPos);
 
-                if (URI != null) {
-                    centipede.examine(
-                            resourceFactory.create(resource, URI));
+                    final String URI = Resources.normalize(
+                            resource.getResource(), new String(href).trim());
+
+                    if (URI != null) {
+                        centipede.examine(
+                                resourceFactory.create(resource, URI));
+                    }
                 }
             }
         }
