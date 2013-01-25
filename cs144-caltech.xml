@@ -1,0 +1,33 @@
+<object-stream>
+  <loader>
+    <class>edu.caltech.visemet.wanderer.Setup</class>
+    <class>edu.caltech.visemet.wanderer.centipedes.CountCentipede</class>
+    <class>edu.caltech.visemet.wanderer.sieves.DuplicateSieve</class>
+    <class>edu.caltech.visemet.wanderer.sieves.DomainSieve</class>
+    <class>edu.caltech.visemet.wanderer.extractors.LinkExtractor</class>
+  </loader>
+  <setup>
+    <centipede class="count-centipede">
+      <resource-sieves>
+        <duplicate-sieve/>
+        <domain-sieve>
+          <pattern>**.caltech.edu</pattern>
+        </domain-sieve>
+      </resource-sieves>
+      <body-extractors>
+        <link-extractor>
+          <resource-factory class="count-centipede" reference="../../.."/>
+        </link-extractor>
+      </body-extractors>
+      <max-count>2000</max-count>
+    </centipede>
+    <resources>
+      <histogram-resource>
+        <depth>0</depth>
+        <resource>http://www.caltech.edu</resource>
+        <incoming/>
+        <outgoing/>
+      </histogram-resource>
+    </resources>
+  </setup>
+</object-stream>
